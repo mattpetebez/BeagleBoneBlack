@@ -1,36 +1,57 @@
-/*
- * This is a template-generated file from BoneScript
- */
-
 /dts-v1/;
-/plugin/;
 
-/{
-    compatible = "ti,beaglebone", "ti,beaglebone-black";
-    part_number = "BS_PINMODE_P8_11_0x27";
+#include "am33xx.dtsi"
+#include "am335x-bone-common-no-capemgr.dtsi"
 
-    exclusive-use =
-        "P8.11",
-        "gpio1_13";
+/ {
+        model = "TI AM335x BeagleBone Black";
+        compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
+};
 
-    fragment@0 {
-        target = <&am33xx_pinmux>;
-        __overlay__ {
-            bs_pinmode_P8_11_0x27: pinmux_bs_pinmode_P8_11_0x27 {
-                pinctrl-single,pins = <0x034 0x27>;
-            };
+#include "am335x-boneblack-1ghz.dtsi"
+
+&ldo3_reg {
+        regulator-min-microvolt = <1800000>;
+        regulator-max-microvolt = <1800000>;
+        regulator-always-on;
+};
+
+&mmc1 {
+        vmmc-supply = <&vmmcsd_fixed>;
+};
+
+&am33xx_pinmux {
+        pinctrl-names = "default";
+        pinctrl-0 = <&clkout2_pin>;
+};
+
+#include "am335x-peripheral-emmc.dtsi"
+#include "am335x-bone-pinmux-emmc.dtsi"
+
+&rtc {
+        system-power-controller;
+};
+
+/* 1-WIRE YEA BOY */
+
+/ {
+        ocp {
+                P9_22_pinmux {status = "disabled"; }; /* Dallas 1W */
         };
-    };
+};
 
-    fragment@1 {
-        target = <&ocp>;
-        __overlay__ {
-            bs_pinmode_P8_11_0x27_pinmux {
-                compatible = "bone-pinmux-helper";
-                status = "okay";
-                pinctrl-names = "default";
-                pinctrl-0 = <&bs_pinmode_P8_11_0x27>;
-            };
+/ {
+        onewire {
+                compatible      = "w1-gpio";
+                pinctrl-names   = "default";
+                pinctrl-0       = <&dallas_w1_pins>;
+                status          = "okay";
+                gpios           = <&gpio0 2 0>;
         };
-    };
+};
+
+&am33xx_pinmux {
+        dallas_w1_pins: pinmux_dallas_w1_pins {
+                pinctrl-single,pins = <0x150 0x37>;
+        };
 };
